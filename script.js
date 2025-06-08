@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             feedingRecords = await response.json();
+            console.log('Fetched feeding records:', feedingRecords); // Debug log
             renderFeedingTimes();
             renderAllFeedingRecords(); // Also update modal if it's open
             processAndRenderFeedingChart(feedingRecords); // New: Process and render chart
@@ -424,10 +425,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
+        console.log('Daily feeding counts:', dailyCounts); // Debug log
+
         // Sort dates chronologically
         const sortedDates = Object.keys(dailyCounts).sort((a, b) => new Date(a) - new Date(b));
         const labels = sortedDates;
         const data = sortedDates.map(date => dailyCounts[date]);
+
+        console.log('Chart labels:', labels); // Debug log
+        console.log('Chart data:', data); // Debug log
 
         renderFeedingChart(labels, data);
     };
