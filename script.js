@@ -401,72 +401,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // --- Image Upload and Gallery Logic ---
-    const imageUploadInput = document.getElementById('image-upload-input');
-    const uploadImageBtn = document.getElementById('upload-image-btn');
-    const galleryGrid = document.getElementById('gallery-grid');
-
-    let imageUrls = []; // Data will now come from the backend
-
-    const fetchImages = async () => {
-        try {
-            const response = await fetch(`${BACKEND_URL}/api/images`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            imageUrls = await response.json();
-            renderGallery();
-        } catch (error) {
-            console.error('Error fetching images:', error);
-        }
-    };
-
-    const renderGallery = () => {
-        galleryGrid.innerHTML = ''; // Clear existing grid
-        imageUrls.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by most recent
-        const latest10Images = imageUrls.slice(0, 10); // Get only the latest 10
-
-        latest10Images.forEach(image => {
-            const galleryItem = document.createElement('div');
-            galleryItem.classList.add('gallery-item');
-            galleryItem.innerHTML = `
-                <img src="${image.url}" alt="Cat Photo">
-                <span class="upload-date">${formatDate(image.timestamp)}</span>
-            `;
-            galleryGrid.appendChild(galleryItem);
-        });
-    };
-
-    uploadImageBtn.addEventListener('click', async () => {
-        const file = imageUploadInput.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const base64Image = e.target.result; // This is the data URL
-                try {
-                    const response = await fetch(`${BACKEND_URL}/api/images/upload`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ url: base64Image, timestamp: new Date().toISOString() }),
-                    });
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    imageUploadInput.value = ''; // Clear input
-                    await fetchImages(); // Re-fetch to update UI
-                } catch (error) {
-                    console.error('Error uploading image:', error);
-                    alert('Failed to upload image. Please check console for details.');
-                }
-            };
-            reader.readAsDataURL(file);
-        } else {
-            alert('Please select an image file to upload.');
-        }
-    });
-
     // Handle generic modal closing for any modal (click outside)
     window.addEventListener('click', (event) => {
         if (event.target == feedingDetailsModal) {
@@ -480,5 +414,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initial data fetch for all sections
     await fetchFeedingRecords();
     await fetchMessages();
-    await fetchImages();
 }); 
