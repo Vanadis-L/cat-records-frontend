@@ -125,6 +125,56 @@ document.addEventListener('DOMContentLoaded', async () => {
         feedingDetailsModal.style.display = 'none';
     });
 
+    // Handle generic modal closing for feeding modal (click outside)
+    window.addEventListener('click', (event) => {
+        if (event.target == feedingDetailsModal) {
+            feedingDetailsModal.style.display = 'none';
+        }
+    });
+
+    const renderAllFeedingRecords = () => {
+        allFeedingRecordsList.innerHTML = '';
+        feedingRecords.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        feedingRecords.forEach(record => {
+            const listItem = document.createElement('li');
+            const statusClass = record.deleted ? 'deleted-item' : '';
+            let buttonHtml = '';
+            if (!record.deleted) {
+                buttonHtml = `<button class="btn delete-restore-btn" data-id="${record.id}" data-action="delete">Delete</button>`;
+            }
+
+            listItem.innerHTML = `
+                <span class="${statusClass}">${formatDate(record.timestamp)} - ${record.type} ${record.deleted ? '(Deleted)' : ''}</span>
+                ${buttonHtml}
+            `;
+            allFeedingRecordsList.appendChild(listItem);
+        });
+    };
+
+    allFeedingRecordsList.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('delete-restore-btn')) {
+            const recordId = parseInt(e.target.dataset.id);
+            const action = e.target.dataset.action;
+            try {
+                if (action === 'delete') {
+                    const response = await fetch(`${BACKEND_URL}/api/feedings/${recordId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ deleted: true }),
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                }
+                await fetchFeedingRecords(); // Re-fetch to update UI
+            } catch (error) {
+                console.error('Error updating feeding record from modal:', error);
+            }
+        }
+    });
+
     // --- Message Board Logic ---
     const messageInput = document.getElementById('message-input');
     const submitMessageBtn = document.getElementById('submit-message-btn');
@@ -323,16 +373,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             reader.readAsDataURL(file);
         } else {
             alert('Please select an image file to upload.');
-        }
-    });
-
-    // Handle generic modal closing for any modal (click outside)
-    window.addEventListener('click', (event) => {
-        if (event.target == feedingDetailsModal) {
-            feedingDetailsModal.style.display = 'none';
-        }
-        if (event.target == messageDetailsModal) {
-            messageDetailsModal.style.display = 'none';
         }
     });
 
