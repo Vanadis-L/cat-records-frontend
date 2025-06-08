@@ -362,4 +362,119 @@ footer {
 
 .modal-list .restore-btn:hover {
     background-color: #218838;
+}
+
+.message-board-section {
+    margin-top: 20px;
+}
+
+.message-display-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap; /* Allows wrapping on smaller screens */
+    gap: 20px;
+}
+
+.latest-messages-container,
+.most-liked-messages-container {
+    flex: 1; /* Allows items to grow and shrink */
+    min-width: 300px; /* Minimum width before wrapping */
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.message-board-section ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.message-board-section li {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.message-board-section li p {
+    margin: 0;
+    word-break: break-word; /* Prevents long words from overflowing */
+    flex-grow: 1;
+    padding-right: 10px;
+}
+
+.message-board-section li .message-time {
+    font-size: 0.8em;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Space between time and buttons */
+    margin-top: 5px; /* Space between message content and time/buttons */
+}
+
+.message-board-section .btn.like-btn,
+.message-board-section .btn.delete-restore-btn {
+    padding: 5px 8px;
+    font-size: 0.75em;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    margin-left: 5px;
+}
+
+.message-board-section .btn.like-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+.message-board-section .btn.like-btn:hover {
+    background-color: #0056b3;
+}
+
+.message-board-section .btn.delete-restore-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+
+.message-board-section .btn.delete-restore-btn:hover {
+    background-color: #c82333;
+}
+
+/* Styling for message modal */
+#message-details-modal .modal-content ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#message-details-modal .modal-content li {
+    background-color: #f2f2f2;
+    border: 1px solid #ddd;
+    margin-bottom: 8px;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+#message-details-modal .modal-content li span {
+    flex-grow: 1;
+}
+
+#message-details-modal .modal-content li .btn {
+    margin-left: 8px;
+}
+
+#message-details-modal .modal-content .deleted-item {
+    text-decoration: line-through;
+    color: #999;
 } 

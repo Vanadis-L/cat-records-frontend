@@ -210,12 +210,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Sort by likes for most liked messages
         const mostLikedMessages = activeMessages.sort((a, b) => b.likes - a.likes).slice(0, 5);
 
-        // Display Latest 5
+        const messageDisplayContainer = document.createElement('div');
+        messageDisplayContainer.classList.add('message-display-container');
+
+        // Create container for Latest Messages
+        const latestMessagesContainer = document.createElement('div');
+        latestMessagesContainer.classList.add('latest-messages-container');
         const latestHeader = document.createElement('h4');
         latestHeader.textContent = 'Latest 5 Messages:';
-        messagesList.appendChild(latestHeader);
+        latestMessagesContainer.appendChild(latestHeader);
+        const latestMessagesList = document.createElement('ul');
         if (latestMessages.length === 0) {
-            messagesList.innerHTML += '<p>No recent messages.</p>';
+            latestMessagesList.innerHTML += '<p>No recent messages.</p>';
         }
         latestMessages.forEach(msg => {
             const listItem = document.createElement('li');
@@ -226,15 +232,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <button class="btn delete-restore-btn" data-id="${msg.id}" data-action="delete-message">Delete</button>
                 </p>
             `;
-            messagesList.appendChild(listItem);
+            latestMessagesList.appendChild(listItem);
         });
+        latestMessagesContainer.appendChild(latestMessagesList);
+        messageDisplayContainer.appendChild(latestMessagesContainer);
 
-        // Display Most Liked 5
+        // Create container for Most Liked Messages
+        const mostLikedMessagesContainer = document.createElement('div');
+        mostLikedMessagesContainer.classList.add('most-liked-messages-container');
         const mostLikedHeader = document.createElement('h4');
         mostLikedHeader.textContent = 'Most Liked 5 Messages:';
-        messagesList.appendChild(mostLikedHeader);
+        mostLikedMessagesContainer.appendChild(mostLikedHeader);
+        const mostLikedMessagesList = document.createElement('ul');
         if (mostLikedMessages.length === 0) {
-            messagesList.innerHTML += '<p>No liked messages yet.</p>';
+            mostLikedMessagesList.innerHTML += '<p>No liked messages yet.</p>';
         }
         mostLikedMessages.forEach(msg => {
             const listItem = document.createElement('li');
@@ -245,8 +256,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <button class="btn delete-restore-btn" data-id="${msg.id}" data-action="delete-message">Delete</button>
                 </p>
             `;
-            messagesList.appendChild(listItem);
+            mostLikedMessagesList.appendChild(listItem);
         });
+        mostLikedMessagesContainer.appendChild(mostLikedMessagesList);
+        messageDisplayContainer.appendChild(mostLikedMessagesContainer);
+
+        messagesList.appendChild(messageDisplayContainer);
     };
 
     submitMessageBtn.addEventListener('click', async () => {
@@ -329,7 +344,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const listItem = document.createElement('li');
             const statusClass = msg.deleted ? 'deleted-item' : '';
             let buttonHtml = '';
-            
             // Add like button for all messages in modal
             buttonHtml += `<button class="btn like-btn" data-id="${msg.id}" data-action="like-message-modal">👍 ${msg.likes}</button>`;
 
