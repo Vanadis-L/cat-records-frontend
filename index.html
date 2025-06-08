@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐾 Our Lovely Community Cat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🐾 Our Lovely Community Cat</h1>
+    </header>
+
+    <main>
+        <section id="cat-profile" class="card">
+            <div class="profile-img-container">
+                <img src="cat_placeholder.jpg" alt="Cat Photo" class="profile-img">
+            </div>
+            <div class="profile-details">
+                <h2>Unknown</h2>
+                <p><strong>Name:</strong> Unknown</p>
+                <p><strong>Age:</strong> More than 4 years old</p>
+                <p><strong>Gender:</strong> Male</p>
+                <p><strong>Health Status:</strong> Unknown.</p>
+                <p><strong>Daily Activity:</strong> During the day, it likes to stay on the manhole cover next to the drain; otherwise, it lies on the low wall by the door or squats near its nest. It loves wet cat food cans.</p>
+            </div>
+        </section>
+
+        <section id="feeding-section" class="card">
+            <h2>🐟 Feed the Cat</h2>
+            <div class="feed-buttons">
+                <button id="feed-can-button" class="btn primary-btn">Feed Cat Can</button>
+                <button id="feed-food-button" class="btn primary-btn">Feed Cat Food</button>
+                <button id="feed-other-button" class="btn primary-btn">Feed Other</button>
+            </div>
+            <h3>Recent Feeding Times:</h3>
+            <ul id="feeding-times-list">
+                <!-- Feeding times will be loaded here by JavaScript -->
+            </ul>
+            <button id="show-all-feedings-btn" class="btn">Show All Records (Including Deleted)</button>
+        </section>
+
+        <section id="message-board" class="card">
+            <h2>💬 Leave a Message for lovely cat.</h2>
+            <textarea id="message-input" placeholder="Please leave behind your little discoveries, stories and loves for the cat. Let's get more information about the cat."></textarea>
+            <button id="submit-message-btn" class="btn">Submit Message</button>
+            <h3>Latest Messages:</h3>
+            <div id="messages-list-container">
+                <ul id="messages-list">
+                    <!-- Messages will be loaded here by JavaScript -->
+                </ul>
+            </div>
+        </section>
+
+        <section id="image-upload-section" class="card">
+            <h2>📸 Upload Cat Photos</h2>
+            <input type="file" id="image-upload-input" accept=".jpg, .jpeg, .png, .gif">
+            <button id="upload-image-btn" class="btn">Upload</button>
+            <p class="hint">Supported formats: JPG, PNG, GIF</p>
+        </section>
+
+        <section id="photo-gallery" class="card">
+            <h2>Cat Photo Album (Latest 10)</h2>
+            <div id="gallery-grid">
+                <!-- Image thumbnails will be loaded here by JavaScript -->
+            </div>
+        </section>
+    </main>
+
+    <!-- The Modal for All Feeding Records -->
+    <div id="feeding-details-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>All Feeding Records</h2>
+            <ul id="all-feeding-records-list" class="modal-list">
+                <!-- All feeding records will be loaded here by JavaScript -->
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Community Cat Records | For inquiries, contact us at xxxxx@xx.xx. Thank you for your support!</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html> 

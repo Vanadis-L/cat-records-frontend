@@ -1,0 +1,365 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 960px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+/* Header */
+header {
+    background-color: #4682b4; /* SteelBlue */
+    color: #fff;
+    text-align: center;
+    padding: 20px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5em;
+}
+
+/* Card Layout for Sections */
+.card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+/* Cat Profile Section */
+#cat-profile {
+    display: flex;
+    align-items: center;
+}
+
+.profile-img-container {
+    flex-shrink: 0;
+    width: 250px;
+    height: 250px;
+    margin-right: 40px;
+}
+
+.profile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.profile-details h2 {
+    margin-top: 0;
+    color: #555;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+.primary-btn {
+    background-color: #28a745;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    display: block;
+    margin: 20px auto;
+    width: fit-content;
+}
+
+.primary-btn:hover {
+    background-color: #218838;
+}
+
+/* Feeding Section */
+#feeding-section h3 {
+    margin-top: 30px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+#feeding-times-list {
+    list-style: none;
+    padding: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#feeding-times-list li {
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee;
+}
+
+#feeding-times-list li:last-child {
+    border-bottom: none;
+}
+
+/* Message Board */
+#message-board textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    min-height: 80px;
+    resize: vertical;
+}
+
+#messages-list-container {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#messages-list {
+    list-style: none;
+    padding: 0;
+}
+
+#messages-list li {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+#messages-list li p {
+    margin: 0;
+}
+
+#messages-list li .message-time {
+    font-size: 0.8em;
+    color: #888;
+    text-align: right;
+    margin-top: 5px;
+}
+
+/* Image Upload Section */
+#image-upload-section input[type="file"] {
+    display: block;
+    margin-bottom: 10px;
+}
+
+#image-upload-section .hint {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Photo Gallery */
+#gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.gallery-item {
+    position: relative;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+}
+
+.gallery-item .upload-date {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-size: 0.7em;
+    padding: 3px 6px;
+    border-radius: 3px;
+}
+
+/* Footer */
+footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 15px 0;
+    margin-top: 30px;
+    font-size: 0.9em;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #cat-profile {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profile-img-container {
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+
+    header h1 {
+        font-size: 2em;
+    }
+
+    .primary-btn {
+        width: 90%;
+    }
+
+    #gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.8em;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    .profile-img-container {
+        width: 180px;
+        height: 180px;
+    }
+
+    #gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+}
+
+.feed-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.feed-buttons .primary-btn {
+    padding: 10px 20px;
+    font-size: 1em;
+    margin: 0; /* Override previous margin */
+    width: auto; /* Override previous width */
+}
+
+#show-all-feedings-btn {
+    display: block;
+    margin-top: 20px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-list {
+    list-style: none;
+    padding: 0;
+}
+
+.modal-list li {
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-list li:last-child {
+    border-bottom: none;
+}
+
+.modal-list .deleted-item {
+    color: #999;
+    text-decoration: line-through;
+}
+
+.modal-list .delete-restore-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8em;
+    transition: background-color 0.3s ease;
+}
+
+.modal-list .delete-restore-btn:hover {
+    background-color: #c82333;
+}
+
+.modal-list .restore-btn {
+    background-color: #28a745;
+}
+
+.modal-list .restore-btn:hover {
+    background-color: #218838;
+} 
