@@ -475,7 +475,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: '每日喂食次数',
+                    label: 'Daily Feeding Count',
                     data: data,
                     backgroundColor: 'rgba(75, 192, 192, 0.6)',
                     borderColor: 'rgba(75, 192, 192, 1)',
@@ -488,7 +488,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: '喂食次数'
+                            text: 'Feeding Count'
                         },
                         ticks: {
                             stepSize: 1
@@ -497,7 +497,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     x: {
                         title: {
                             display: true,
-                            text: '日期'
+                            text: 'Date'
                         }
                     }
                 },
@@ -519,7 +519,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: '喂食分布',
+                    label: 'Feeding Distribution',
                     data: data,
                     backgroundColor: backgroundColors,
                     borderColor: borderColors,
@@ -538,7 +538,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     label += ': ';
                                 }
                                 if (context.parsed !== null) {
-                                    label += context.parsed + ' 天';
+                                    label += context.parsed + ' Days';
                                 }
                                 return label;
                             }
