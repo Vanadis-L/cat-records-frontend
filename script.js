@@ -3,7 +3,7 @@
 const catPlaceholderImage = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 // IMPORTANT: Set your backend URL here
-const BACKEND_URL = 'http://167.99.71.89:3000';
+const BACKEND_URL = 'https://catfeed.website';
 
 // Pre-populate cat_placeholder.jpg if it doesn't exist. 
 // In a real scenario, you'd serve this image from your server or a CDN.
