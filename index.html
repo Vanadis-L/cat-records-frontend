@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🐾 Our Lovely Community Cat</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <header>
@@ -51,6 +52,10 @@
             <button id="show-all-messages-btn" class="btn">Show All Messages (Including Deleted)</button>
         </section>
 
+        <section id="feeding-statistics-section" class="card">
+            <h2>📊 Feeding Statistics</h2>
+            <canvas id="feedingChart"></canvas>
+        </section>
     </main>
 
     <!-- The Modal for All Feeding Records -->

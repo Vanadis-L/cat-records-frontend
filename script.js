@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             feedingRecords = await response.json();
             renderFeedingTimes();
             renderAllFeedingRecords(); // Also update modal if it's open
+            processAndRenderFeedingChart(feedingRecords); // New: Process and render chart
         } catch (error) {
             console.error('Error fetching feeding records:', error);
         }
@@ -410,6 +411,70 @@ document.addEventListener('DOMContentLoaded', async () => {
             messageDetailsModal.style.display = 'none';
         }
     });
+
+    // Chart related functions
+    let feedingChartInstance = null; // To hold the Chart.js instance
+
+    const processAndRenderFeedingChart = (records) => {
+        const dailyCounts = {};
+        records.forEach(record => {
+            if (!record.deleted) { // Only count active feedings
+                const date = formatDate(record.timestamp).split(' ')[0]; // Get YYYY/MM/DD part
+                dailyCounts[date] = (dailyCounts[date] || 0) + 1;
+            }
+        });
+
+        // Sort dates chronologically
+        const sortedDates = Object.keys(dailyCounts).sort((a, b) => new Date(a) - new Date(b));
+        const labels = sortedDates;
+        const data = sortedDates.map(date => dailyCounts[date]);
+
+        renderFeedingChart(labels, data);
+    };
+
+    const renderFeedingChart = (labels, data) => {
+        const ctx = document.getElementById('feedingChart').getContext('2d');
+
+        if (feedingChartInstance) {
+            feedingChartInstance.destroy(); // Destroy existing chart before creating a new one
+        }
+
+        feedingChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '每日喂食次数',
+                    data: data,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '喂食次数'
+                        },
+                        ticks: {
+                            stepSize: 1
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '日期'
+                        }
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    };
 
     // Initial data fetch for all sections
     await fetchFeedingRecords();
