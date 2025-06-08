@@ -5,6 +5,10 @@ const catPlaceholderImage = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5B
 // IMPORTANT: Set your backend URL here
 const BACKEND_URL = 'https://catfeed.website';
 
+// Display limits for logs and messages
+const FEEDING_LOG_LIMIT = 20;
+const MESSAGE_DISPLAY_LIMIT = 10;
+
 // Pre-populate cat_placeholder.jpg if it doesn't exist. 
 // In a real scenario, you'd serve this image from your server or a CDN.
 // This client-side check is primarily for local development convenience.
@@ -34,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const feedingTimesList = document.getElementById('feeding-times-list');
     const showAllFeedingsBtn = document.getElementById('show-all-feedings-btn');
     const feedingDetailsModal = document.getElementById('feeding-details-modal');
-    const closeModalButton = document.querySelector('#feeding-details-modal .close-button');
+    const closeModalButtonFeeding = document.querySelector('#feeding-details-modal .close-button');
     const allFeedingRecordsList = document.getElementById('all-feeding-records-list');
 
     let feedingRecords = []; // Data will now come from the backend
@@ -57,7 +61,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         feedingTimesList.innerHTML = ''; // Clear existing list
         const activeFeedings = feedingRecords.filter(record => !record.deleted);
         activeFeedings.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by most recent
-        activeFeedings.forEach((record) => {
+        const latestFeedings = activeFeedings.slice(0, FEEDING_LOG_LIMIT); // Apply limit
+
+        latestFeedings.forEach((record) => {
             const listItem = document.createElement('li');
             listItem.innerHTML = `
                 <span>${formatDate(record.timestamp)} - ${record.type}</span>
@@ -115,65 +121,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         feedingDetailsModal.style.display = 'block';
     });
 
-    closeModalButton.addEventListener('click', () => {
+    closeModalButtonFeeding.addEventListener('click', () => {
         feedingDetailsModal.style.display = 'none';
-    });
-
-    window.addEventListener('click', (event) => {
-        if (event.target == feedingDetailsModal) {
-            feedingDetailsModal.style.display = 'none';
-        }
-    });
-
-    const renderAllFeedingRecords = () => {
-        allFeedingRecordsList.innerHTML = '';
-        feedingRecords.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-        feedingRecords.forEach(record => {
-            const listItem = document.createElement('li');
-            const statusClass = record.deleted ? 'deleted-item' : '';
-            
-            let buttonHtml = '';
-            if (!record.deleted) {
-                buttonHtml = `<button class="btn delete-restore-btn" data-id="${record.id}" data-action="delete">Delete</button>`;
-            }
-
-            listItem.innerHTML = `
-                <span class="${statusClass}">${formatDate(record.timestamp)} - ${record.type} ${record.deleted ? '(Deleted)' : ''}</span>
-                ${buttonHtml}
-            `;
-            allFeedingRecordsList.appendChild(listItem);
-        });
-    };
-
-    allFeedingRecordsList.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('delete-restore-btn')) {
-            const recordId = parseInt(e.target.dataset.id);
-            const action = e.target.dataset.action;
-            try {
-                // Only delete action is relevant now, restore is removed.
-                if (action === 'delete') {
-                    const response = await fetch(`${BACKEND_URL}/api/feedings/${recordId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ deleted: true }),
-                    });
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                }
-                await fetchFeedingRecords(); // Re-fetch to update UI
-            } catch (error) {
-                console.error('Error updating feeding record from modal:', error);
-            }
-        }
     });
 
     // --- Message Board Logic ---
     const messageInput = document.getElementById('message-input');
     const submitMessageBtn = document.getElementById('submit-message-btn');
     const messagesList = document.getElementById('messages-list');
+    const showAllMessagesBtn = document.getElementById('show-all-messages-btn');
+    const messageDetailsModal = document.getElementById('message-details-modal');
+    const closeModalButtonMessage = document.querySelector('#message-details-modal .close-button');
+    const allMessageRecordsList = document.getElementById('all-message-records-list');
 
     let messages = []; // Data will now come from the backend
 
@@ -185,6 +144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             messages = await response.json();
             renderMessages();
+            renderAllMessageRecords(); // Also update modal if open
         } catch (error) {
             console.error('Error fetching messages:', error);
         }
@@ -192,12 +152,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const renderMessages = () => {
         messagesList.innerHTML = ''; // Clear existing list
-        messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by most recent
-        messages.forEach(msg => {
+        const activeMessages = messages.filter(msg => !msg.deleted);
+        activeMessages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by most recent
+        const latestMessages = activeMessages.slice(0, MESSAGE_DISPLAY_LIMIT); // Apply limit
+
+        latestMessages.forEach(msg => {
             const listItem = document.createElement('li');
             listItem.innerHTML = `
                 <p>${msg.content}</p>
-                <p class="message-time">${formatDate(msg.timestamp)}</p>
+                <p class="message-time">${formatDate(msg.timestamp)}
+                    <button class="btn delete-restore-btn" data-id="${msg.id}" data-action="delete-message">Delete</button>
+                </p>
             `;
             messagesList.appendChild(listItem);
         });
@@ -221,6 +186,76 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await fetchMessages(); // Re-fetch to update UI
             } catch (error) {
                 console.error('Error submitting message:', error);
+            }
+        }
+    });
+
+    messagesList.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('delete-restore-btn') && e.target.dataset.action === 'delete-message') {
+            const messageId = parseInt(e.target.dataset.id);
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/messages/${messageId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ deleted: true }),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                await fetchMessages(); // Re-fetch to update UI
+            } catch (error) {
+                console.error('Error deleting message:', error);
+            }
+        }
+    });
+
+    showAllMessagesBtn.addEventListener('click', () => {
+        renderAllMessageRecords();
+        messageDetailsModal.style.display = 'block';
+    });
+
+    closeModalButtonMessage.addEventListener('click', () => {
+        messageDetailsModal.style.display = 'none';
+    });
+
+    const renderAllMessageRecords = () => {
+        allMessageRecordsList.innerHTML = '';
+        messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        messages.forEach(msg => {
+            const listItem = document.createElement('li');
+            const statusClass = msg.deleted ? 'deleted-item' : '';
+            let buttonHtml = '';
+            if (!msg.deleted) {
+                buttonHtml = `<button class="btn delete-restore-btn" data-id="${msg.id}" data-action="delete-message-modal">Delete</button>`;
+            }
+
+            listItem.innerHTML = `
+                <span class="${statusClass}">${formatDate(msg.timestamp)} - ${msg.content} ${msg.deleted ? '(Deleted)' : ''}</span>
+                ${buttonHtml}
+            `;
+            allMessageRecordsList.appendChild(listItem);
+        });
+    };
+
+    allMessageRecordsList.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('delete-restore-btn') && e.target.dataset.action === 'delete-message-modal') {
+            const messageId = parseInt(e.target.dataset.id);
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/messages/${messageId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ deleted: true }),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                await fetchMessages(); // Re-fetch to update UI
+            } catch (error) {
+                console.error('Error deleting message from modal:', error);
             }
         }
     });
@@ -288,6 +323,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             reader.readAsDataURL(file);
         } else {
             alert('Please select an image file to upload.');
+        }
+    });
+
+    // Handle generic modal closing for any modal (click outside)
+    window.addEventListener('click', (event) => {
+        if (event.target == feedingDetailsModal) {
+            feedingDetailsModal.style.display = 'none';
+        }
+        if (event.target == messageDetailsModal) {
+            messageDetailsModal.style.display = 'none';
         }
     });
 
