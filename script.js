@@ -2,24 +2,17 @@
 // I'm using a simple data URL for a small transparent GIF. You might want to replace this with a proper image file.
 const catPlaceholderImage = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
+// IMPORTANT: Set your backend URL here
+const BACKEND_URL = 'http://167.99.71.89:3000';
+
 // Pre-populate cat_placeholder.jpg if it doesn't exist. 
 // In a real scenario, you'd serve this image from your server or a CDN.
+// This client-side check is primarily for local development convenience.
 const img = new Image();
 img.src = "cat_placeholder.jpg";
 img.onerror = () => {
-    // Only if the image fails to load (i.e., it doesn't exist), then we can create it.
-    // In a real application, you'd ensure this image is part of your deployment.
-    // For this demonstration, we'll use a very small, simple placeholder.
-    // This part is for demonstration and might not be suitable for production.
-    fetch(catPlaceholderImage)
-        .then(res => res.blob())
-        .then(blob => {
-            const file = new File([blob], "cat_placeholder.jpg", { type: "image/gif" });
-            // In a real web app, you would not write files directly from client-side JS.
-            // This is purely illustrative of how an initial image *could* be set up.
-            // For this static site, the user would manually place the image.
-            console.log("cat_placeholder.jpg would be created here if possible.");
-        });
+    console.log("cat_placeholder.jpg not found. Please place a cat image file in the root directory.");
+    // In a real deployment, ensure this image is served from your static host.
 };
 
 // Helper function to format date as YYYY/MM/DD
@@ -33,7 +26,7 @@ const formatDate = (dateString) => {
     return `${year}/${month}/${day} ${hours}:${minutes}`;
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // --- Feeding Section Logic ---
     const feedCanButton = document.getElementById('feed-can-button');
     const feedFoodButton = document.getElementById('feed-food-button');
@@ -44,53 +37,81 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModalButton = document.querySelector('#feeding-details-modal .close-button');
     const allFeedingRecordsList = document.getElementById('all-feeding-records-list');
 
-    let feedingRecords = JSON.parse(localStorage.getItem('feedingRecords')) || [];
+    let feedingRecords = []; // Data will now come from the backend
 
-    const saveFeedingRecords = () => {
-        localStorage.setItem('feedingRecords', JSON.stringify(feedingRecords));
+    const fetchFeedingRecords = async () => {
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/feedings`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            feedingRecords = await response.json();
+            renderFeedingTimes();
+            renderAllFeedingRecords(); // Also update modal if it's open
+        } catch (error) {
+            console.error('Error fetching feeding records:', error);
+        }
     };
 
     const renderFeedingTimes = () => {
         feedingTimesList.innerHTML = ''; // Clear existing list
         const activeFeedings = feedingRecords.filter(record => !record.deleted);
         activeFeedings.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by most recent
-        activeFeedings.forEach((record, index) => {
+        activeFeedings.forEach((record) => {
             const listItem = document.createElement('li');
             listItem.innerHTML = `
                 <span>${formatDate(record.timestamp)} - ${record.type}</span>
-                <button class="btn delete-restore-btn" data-index="${record.id}" data-action="delete">Delete</button>
+                <button class="btn delete-restore-btn" data-id="${record.id}" data-action="delete">Delete</button>
             `;
             feedingTimesList.appendChild(listItem);
         });
     };
 
-    const addFeedingRecord = (type) => {
-        const now = new Date().toISOString();
-        const newRecord = { id: Date.now(), timestamp: now, type: type, deleted: false };
-        feedingRecords.unshift(newRecord); // Add to the beginning
-        saveFeedingRecords();
-        renderFeedingTimes();
+    const addFeedingRecord = async (type) => {
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/feedings`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ type }),
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            await fetchFeedingRecords(); // Re-fetch all to update UI
+        } catch (error) {
+            console.error('Error adding feeding record:', error);
+        }
     };
 
     feedCanButton.addEventListener('click', () => addFeedingRecord('Cat Can'));
     feedFoodButton.addEventListener('click', () => addFeedingRecord('Cat Food'));
     feedOtherButton.addEventListener('click', () => addFeedingRecord('Other'));
 
-    feedingTimesList.addEventListener('click', (e) => {
+    feedingTimesList.addEventListener('click', async (e) => {
         if (e.target.classList.contains('delete-restore-btn')) {
-            const recordId = parseInt(e.target.dataset.index);
-            const recordIndex = feedingRecords.findIndex(record => record.id === recordId);
-            if (recordIndex !== -1) {
-                feedingRecords[recordIndex].deleted = true; // Mark as deleted
-                saveFeedingRecords();
-                renderFeedingTimes();
-                renderAllFeedingRecords(); // Update modal if open
+            const recordId = parseInt(e.target.dataset.id);
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/feedings/${recordId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ deleted: true }),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                await fetchFeedingRecords(); // Re-fetch to update UI
+            } catch (error) {
+                console.error('Error deleting feeding record:', error);
             }
         }
     });
 
     showAllFeedingsBtn.addEventListener('click', () => {
-        renderAllFeedingRecords();
+        renderAllFeedingRecords(); // Ensure modal is up-to-date
         feedingDetailsModal.style.display = 'block';
     });
 
@@ -113,8 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             let buttonHtml = '';
             if (!record.deleted) {
-                // Only show delete button for non-deleted items in the modal
-                buttonHtml = `<button class="btn delete-restore-btn" data-index="${record.id}" data-action="delete">Delete</button>`;
+                buttonHtml = `<button class="btn delete-restore-btn" data-id="${record.id}" data-action="delete">Delete</button>`;
             }
 
             listItem.innerHTML = `
@@ -125,32 +145,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    allFeedingRecordsList.addEventListener('click', (e) => {
+    allFeedingRecordsList.addEventListener('click', async (e) => {
         if (e.target.classList.contains('delete-restore-btn')) {
-            const recordId = parseInt(e.target.dataset.index);
+            const recordId = parseInt(e.target.dataset.id);
             const action = e.target.dataset.action;
-            const recordIndex = feedingRecords.findIndex(record => record.id === recordId);
-            if (recordIndex !== -1) {
+            try {
+                // Only delete action is relevant now, restore is removed.
                 if (action === 'delete') {
-                    feedingRecords[recordIndex].deleted = true;
+                    const response = await fetch(`${BACKEND_URL}/api/feedings/${recordId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ deleted: true }),
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
                 }
-                // No restore action needed now
-                saveFeedingRecords();
-                renderFeedingTimes(); // Update main list
-                renderAllFeedingRecords(); // Update modal
+                await fetchFeedingRecords(); // Re-fetch to update UI
+            } catch (error) {
+                console.error('Error updating feeding record from modal:', error);
             }
         }
     });
-
-    // Initial render
-    renderFeedingTimes();
 
     // --- Message Board Logic ---
     const messageInput = document.getElementById('message-input');
     const submitMessageBtn = document.getElementById('submit-message-btn');
     const messagesList = document.getElementById('messages-list');
 
-    let messages = JSON.parse(localStorage.getItem('catMessages')) || [];
+    let messages = []; // Data will now come from the backend
+
+    const fetchMessages = async () => {
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/messages`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            messages = await response.json();
+            renderMessages();
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+    };
 
     const renderMessages = () => {
         messagesList.innerHTML = ''; // Clear existing list
@@ -165,26 +203,47 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    submitMessageBtn.addEventListener('click', () => {
+    submitMessageBtn.addEventListener('click', async () => {
         const content = messageInput.value.trim();
         if (content) {
-            const newMessage = { content, timestamp: new Date().toISOString() };
-            messages.unshift(newMessage); // Add to the beginning
-            localStorage.setItem('catMessages', JSON.stringify(messages));
-            messageInput.value = ''; // Clear input
-            renderMessages();
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ content }),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                messageInput.value = ''; // Clear input
+                await fetchMessages(); // Re-fetch to update UI
+            } catch (error) {
+                console.error('Error submitting message:', error);
+            }
         }
     });
-
-    // Initial render
-    renderMessages();
 
     // --- Image Upload and Gallery Logic ---
     const imageUploadInput = document.getElementById('image-upload-input');
     const uploadImageBtn = document.getElementById('upload-image-btn');
     const galleryGrid = document.getElementById('gallery-grid');
 
-    let imageUrls = JSON.parse(localStorage.getItem('catImages')) || [];
+    let imageUrls = []; // Data will now come from the backend
+
+    const fetchImages = async () => {
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/images`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            imageUrls = await response.json();
+            renderGallery();
+        } catch (error) {
+            console.error('Error fetching images:', error);
+        }
+    };
 
     const renderGallery = () => {
         galleryGrid.innerHTML = ''; // Clear existing grid
@@ -202,16 +261,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    uploadImageBtn.addEventListener('click', () => {
+    uploadImageBtn.addEventListener('click', async () => {
         const file = imageUploadInput.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                const newImage = { url: e.target.result, timestamp: new Date().toISOString() };
-                imageUrls.unshift(newImage); // Add to the beginning
-                localStorage.setItem('catImages', JSON.stringify(imageUrls));
-                imageUploadInput.value = ''; // Clear input
-                renderGallery();
+            reader.onload = async (e) => {
+                const base64Image = e.target.result; // This is the data URL
+                try {
+                    const response = await fetch(`${BACKEND_URL}/api/images/upload`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ url: base64Image, timestamp: new Date().toISOString() }),
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    imageUploadInput.value = ''; // Clear input
+                    await fetchImages(); // Re-fetch to update UI
+                } catch (error) {
+                    console.error('Error uploading image:', error);
+                    alert('Failed to upload image. Please check console for details.');
+                }
             };
             reader.readAsDataURL(file);
         } else {
@@ -219,6 +291,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initial render
-    renderGallery();
+    // Initial data fetch for all sections
+    await fetchFeedingRecords();
+    await fetchMessages();
+    await fetchImages();
 }); 
