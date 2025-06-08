@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Message Board Logic ---
     const messageInput = document.getElementById('message-input');
     const submitMessageBtn = document.getElementById('submit-message-btn');
-    const messagesList = document.getElementById('messages-list');
+    const messagesList = document.getElementById('messages-list-container');
     const showAllMessagesBtn = document.getElementById('show-all-messages-btn');
     const messageDetailsModal = document.getElementById('message-details-modal');
     const closeModalButtonMessage = document.querySelector('#message-details-modal .close-button');
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const renderMessages = () => {
-        messagesList.innerHTML = ''; // Clear existing list
+        messagesList.innerHTML = ''; // Clear existing list, now refers to messages-list-container
         const activeMessages = messages.filter(msg => !msg.deleted);
         
         // Sort by most recent for latest messages
@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const latestHeader = document.createElement('h4');
         latestHeader.textContent = 'Latest 5 Messages:';
         latestMessagesContainer.appendChild(latestHeader);
-        const latestMessagesList = document.createElement('ul');
+        const latestMessagesList = document.createElement('ul'); // Create ul here
         if (latestMessages.length === 0) {
             latestMessagesList.innerHTML += '<p>No recent messages.</p>';
         }
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const mostLikedHeader = document.createElement('h4');
         mostLikedHeader.textContent = 'Most Liked 5 Messages:';
         mostLikedMessagesContainer.appendChild(mostLikedHeader);
-        const mostLikedMessagesList = document.createElement('ul');
+        const mostLikedMessagesList = document.createElement('ul'); // Create ul here
         if (mostLikedMessages.length === 0) {
             mostLikedMessagesList.innerHTML += '<p>No liked messages yet.</p>';
         }
