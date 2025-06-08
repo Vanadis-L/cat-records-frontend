@@ -415,6 +415,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Chart related functions
     let feedingChartInstance = null; // To hold the Chart.js instance
+    let dailyDistributionChartInstance = null; // To hold the Chart.js instance for the pie chart
 
     const processAndRenderFeedingChart = (records) => {
         const dailyCounts = {};
@@ -425,17 +426,41 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        console.log('Daily feeding counts:', dailyCounts); // Debug log
-
-        // Sort dates chronologically
+        // Sort dates chronologically for bar chart
         const sortedDates = Object.keys(dailyCounts).sort((a, b) => new Date(a) - new Date(b));
-        const labels = sortedDates;
-        const data = sortedDates.map(date => dailyCounts[date]);
+        const barChartLabels = sortedDates;
+        const barChartData = sortedDates.map(date => dailyCounts[date]);
 
-        console.log('Chart labels:', labels); // Debug log
-        console.log('Chart data:', data); // Debug log
+        renderFeedingChart(barChartLabels, barChartData);
 
-        renderFeedingChart(labels, data);
+        // Calculate daily feeding distribution for pie chart
+        const feedingFrequencyCounts = {}; // e.g., { '1': 5, '2': 10 } (5 days had 1 feeding, 10 days had 2 feedings)
+        Object.values(dailyCounts).forEach(count => {
+            feedingFrequencyCounts[count] = (feedingFrequencyCounts[count] || 0) + 1;
+        });
+
+        const pieChartLabels = Object.keys(feedingFrequencyCounts).map(count => `${count} 顿`);
+        const pieChartData = Object.values(feedingFrequencyCounts);
+        const backgroundColors = [
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 206, 86, 0.6)',
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(153, 102, 255, 0.6)',
+            'rgba(255, 159, 64, 0.6)',
+            'rgba(199, 199, 199, 0.6)'
+        ];
+        const borderColors = [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)',
+            'rgba(199, 199, 199, 1)'
+        ];
+
+        renderPieChart(pieChartLabels, pieChartData, backgroundColors, borderColors);
     };
 
     const renderFeedingChart = (labels, data) => {
@@ -478,6 +503,48 @@ document.addEventListener('DOMContentLoaded', async () => {
                 },
                 responsive: true,
                 maintainAspectRatio: false
+            }
+        });
+    };
+
+    const renderPieChart = (labels, data, backgroundColors, borderColors) => {
+        const ctx = document.getElementById('dailyFeedingDistributionChart').getContext('2d');
+
+        if (dailyDistributionChartInstance) {
+            dailyDistributionChartInstance.destroy(); // Destroy existing chart before creating a new one
+        }
+
+        dailyDistributionChartInstance = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '喂食分布',
+                    data: data,
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.parsed + ' 天';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
             }
         });
     };

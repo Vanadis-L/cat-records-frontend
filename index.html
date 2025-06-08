@@ -54,7 +54,16 @@
 
         <section id="feeding-statistics-section" class="card">
             <h2>📊 Feeding Statistics</h2>
-            <canvas id="feedingChart"></canvas>
+            <div class="chart-flex-container">
+                <div style="flex: 1;">
+                    <h4>每日喂食次数</h4>
+                    <canvas id="feedingChart"></canvas>
+                </div>
+                <div style="flex: 1;">
+                    <h4>喂食频率分布</h4>
+                    <canvas id="dailyFeedingDistributionChart"></canvas>
+                </div>
+            </div>
         </section>
     </main>
 
