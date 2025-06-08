@@ -203,14 +203,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     const renderMessages = () => {
         messagesList.innerHTML = ''; // Clear existing list
         const activeMessages = messages.filter(msg => !msg.deleted);
-        activeMessages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by most recent
-        const latestMessages = activeMessages.slice(0, MESSAGE_DISPLAY_LIMIT); // Apply limit
+        
+        // Sort by most recent for latest messages
+        const latestMessages = activeMessages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 5);
+        
+        // Sort by likes for most liked messages
+        const mostLikedMessages = activeMessages.sort((a, b) => b.likes - a.likes).slice(0, 5);
 
+        // Display Latest 5
+        const latestHeader = document.createElement('h4');
+        latestHeader.textContent = 'Latest 5 Messages:';
+        messagesList.appendChild(latestHeader);
+        if (latestMessages.length === 0) {
+            messagesList.innerHTML += '<p>No recent messages.</p>';
+        }
         latestMessages.forEach(msg => {
             const listItem = document.createElement('li');
             listItem.innerHTML = `
                 <p>${msg.content}</p>
                 <p class="message-time">${formatDate(msg.timestamp)}
+                    <button class="btn like-btn" data-id="${msg.id}" data-action="like-message">👍 ${msg.likes}</button>
+                    <button class="btn delete-restore-btn" data-id="${msg.id}" data-action="delete-message">Delete</button>
+                </p>
+            `;
+            messagesList.appendChild(listItem);
+        });
+
+        // Display Most Liked 5
+        const mostLikedHeader = document.createElement('h4');
+        mostLikedHeader.textContent = 'Most Liked 5 Messages:';
+        messagesList.appendChild(mostLikedHeader);
+        if (mostLikedMessages.length === 0) {
+            messagesList.innerHTML += '<p>No liked messages yet.</p>';
+        }
+        mostLikedMessages.forEach(msg => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `
+                <p>${msg.content}</p>
+                <p class="message-time">${formatDate(msg.timestamp)}
+                    <button class="btn like-btn" data-id="${msg.id}" data-action="like-message">👍 ${msg.likes}</button>
                     <button class="btn delete-restore-btn" data-id="${msg.id}" data-action="delete-message">Delete</button>
                 </p>
             `;
@@ -241,8 +272,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     messagesList.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('delete-restore-btn') && e.target.dataset.action === 'delete-message') {
-            const messageId = parseInt(e.target.dataset.id);
+        const target = e.target;
+        if (target.classList.contains('delete-restore-btn') && target.dataset.action === 'delete-message') {
+            const messageId = parseInt(target.dataset.id);
             try {
                 const response = await fetch(`${BACKEND_URL}/api/messages/${messageId}`, {
                     method: 'PUT',
@@ -257,6 +289,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await fetchMessages(); // Re-fetch to update UI
             } catch (error) {
                 console.error('Error deleting message:', error);
+            }
+        } else if (target.classList.contains('like-btn') && target.dataset.action === 'like-message') {
+            const messageId = parseInt(target.dataset.id);
+            const messageToLike = messages.find(msg => msg.id === messageId);
+            if (messageToLike) {
+                try {
+                    const response = await fetch(`${BACKEND_URL}/api/messages/${messageId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ likes: messageToLike.likes + 1 }),
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    await fetchMessages(); // Re-fetch to update UI
+                } catch (error) {
+                    console.error('Error liking message:', error);
+                }
             }
         }
     });
@@ -277,8 +329,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const listItem = document.createElement('li');
             const statusClass = msg.deleted ? 'deleted-item' : '';
             let buttonHtml = '';
+            
+            // Add like button for all messages in modal
+            buttonHtml += `<button class="btn like-btn" data-id="${msg.id}" data-action="like-message-modal">👍 ${msg.likes}</button>`;
+
             if (!msg.deleted) {
-                buttonHtml = `<button class="btn delete-restore-btn" data-id="${msg.id}" data-action="delete-message-modal">Delete</button>`;
+                buttonHtml += `<button class="btn delete-restore-btn" data-id="${msg.id}" data-action="delete-message-modal">Delete</button>`;
             }
 
             listItem.innerHTML = `
@@ -290,8 +346,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     allMessageRecordsList.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('delete-restore-btn') && e.target.dataset.action === 'delete-message-modal') {
-            const messageId = parseInt(e.target.dataset.id);
+        const target = e.target;
+        if (target.classList.contains('delete-restore-btn') && target.dataset.action === 'delete-message-modal') {
+            const messageId = parseInt(target.dataset.id);
             try {
                 const response = await fetch(`${BACKEND_URL}/api/messages/${messageId}`, {
                     method: 'PUT',
@@ -306,6 +363,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await fetchMessages(); // Re-fetch to update UI
             } catch (error) {
                 console.error('Error deleting message from modal:', error);
+            }
+        } else if (target.classList.contains('like-btn') && target.dataset.action === 'like-message-modal') {
+            const messageId = parseInt(target.dataset.id);
+            const messageToLike = messages.find(msg => msg.id === messageId);
+            if (messageToLike) {
+                try {
+                    const response = await fetch(`${BACKEND_URL}/api/messages/${messageId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ likes: messageToLike.likes + 1 }),
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    await fetchMessages(); // Re-fetch to update UI
+                } catch (error) {
+                    console.error('Error liking message from modal:', error);
+                }
             }
         }
     });
@@ -373,6 +450,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             reader.readAsDataURL(file);
         } else {
             alert('Please select an image file to upload.');
+        }
+    });
+
+    // Handle generic modal closing for any modal (click outside)
+    window.addEventListener('click', (event) => {
+        if (event.target == feedingDetailsModal) {
+            feedingDetailsModal.style.display = 'none';
+        }
+        if (event.target == messageDetailsModal) {
+            messageDetailsModal.style.display = 'none';
         }
     });
 
