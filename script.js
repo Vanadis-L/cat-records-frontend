@@ -439,7 +439,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             feedingFrequencyCounts[count] = (feedingFrequencyCounts[count] || 0) + 1;
         });
 
-        const pieChartLabels = Object.keys(feedingFrequencyCounts).map(count => `${count} 顿`);
+        const pieChartLabels = Object.keys(feedingFrequencyCounts).map(count => `${count} servings`);
         const pieChartData = Object.values(feedingFrequencyCounts);
         const backgroundColors = [
             'rgba(255, 99, 132, 0.6)',
