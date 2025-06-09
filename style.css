@@ -497,4 +497,17 @@ footer {
     max-height: 350px; /* Limit the height of the charts */
     width: 100% !important; /* Ensure charts take full width of their container */
     height: auto !important; /* Maintain aspect ratio */
+}
+
+.important-notice {
+    background-color: #fff3cd; /* Light warning yellow */
+    color: #856404; /* Darker yellow text */
+    border: 1px solid #ffeeba;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 20px auto;
+    text-align: center;
+    font-weight: bold;
+    max-width: 960px; /* Align with container if possible */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 } 
